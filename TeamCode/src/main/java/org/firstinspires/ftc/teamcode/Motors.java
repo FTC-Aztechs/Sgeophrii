@@ -63,7 +63,7 @@ public class Motors extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         //variables for motors
         //left motor
-        double tgtPower1 = 0;
+        double tgtPower1 = 0.1;
         //right motor
         double tgtPower2 = 0;
         //speed variable
