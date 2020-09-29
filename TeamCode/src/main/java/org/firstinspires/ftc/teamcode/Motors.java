@@ -67,7 +67,7 @@ public class Motors extends LinearOpMode {
         //right motor
         double tgtPower2 = 0;
         //speed variable
-        double speed = 1;
+        double speed = 2;
         //speed limit
         double speedLimit = 3;
 
