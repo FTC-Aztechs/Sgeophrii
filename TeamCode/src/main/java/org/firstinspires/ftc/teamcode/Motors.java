@@ -69,7 +69,7 @@ public class Motors extends LinearOpMode {
         //speed variable
         double speed = 1;
         //speed limit
-        double speedLimit = 2.5;
+        double speedLimit = 2.4;
 
         while (opModeIsActive()) {
             //put code here
