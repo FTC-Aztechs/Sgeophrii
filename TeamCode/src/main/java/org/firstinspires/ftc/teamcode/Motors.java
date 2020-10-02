@@ -69,8 +69,7 @@ public class Motors extends LinearOpMode {
         //speed variable
         double speed = 2;
         //speed limit
-        double speedLimit = 2.4;
-
+        double speedLimit = 2.3;
         while (opModeIsActive()) {
             //put code here
             if(gamepad1.y){
