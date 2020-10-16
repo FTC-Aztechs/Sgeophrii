@@ -63,14 +63,13 @@ public class Motors extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         //variables for motors
         //left motor
-        double tgtPower1 = 0.1;
+        double tgtPower1 = 0.15;
         //right motor
         double tgtPower2 = 0;
         //speed variable
-        double speed = 1;
+        double speed = 2;
         //speed limit
-        double speedLimit = 3;
-
+        double speedLimit = 2.3;
         while (opModeIsActive()) {
             //put code here
             if(gamepad1.y){
