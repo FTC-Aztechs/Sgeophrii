@@ -34,7 +34,10 @@ import android.util.Log;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -60,6 +63,8 @@ public class Sgp_BasicOpMode_Iterative extends OpMode
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor Left_Motor = null;
     private DcMotor Right_Motor = null;
+    private DcMotor Arm_Motor = null;
+    private Servo Arm_Servo = null;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -73,11 +78,15 @@ public class Sgp_BasicOpMode_Iterative extends OpMode
         // step (using the FTC Robot Controller app on the phone).
         Left_Motor  = hardwareMap.get(DcMotor.class, "Left_Motor");
         Right_Motor = hardwareMap.get(DcMotor.class, "Right_Motor");
+        Arm_Motor = hardwareMap.get(DcMotor.class, "Arm_Motor");
+        Arm_Servo = hardwareMap.get(Servo.class, "Arm_Servo");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
         Left_Motor.setDirection(DcMotor.Direction.FORWARD);
         Right_Motor.setDirection(DcMotor.Direction.REVERSE);
+        Arm_Motor.setDirection(DcMotor.Direction.FORWARD);
+        Arm_Servo.setDirection(Servo.Direction.FORWARD );
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
@@ -109,6 +118,8 @@ public class Sgp_BasicOpMode_Iterative extends OpMode
         // Setup a variable for each drive wheel to save power level for telemetry
         double leftPower;
         double rightPower;
+        double armPower;
+        double servoPower;
 
         // Choose to drive using either Tank Mode, or POV Mode
         // Comment out the method that's not used.  The default below is POV.
@@ -117,8 +128,13 @@ public class Sgp_BasicOpMode_Iterative extends OpMode
         // - This uses basic math to combine motions and is easier to drive straight.
         double drive = -gamepad1.left_stick_y;
         double turn  =  gamepad1.right_stick_x;
+        double lift = gamepad2.right_stick_y;
+        double up = gamepad2.left_stick_y;
+
         leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
         rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
+        armPower     = Range.clip(lift, -1.0, 1.0);
+        servoPower   = Range.clip(up, -1.0, 1.0 );
 
         // Tank Mode uses one stick to control each wheel.
         // - This requires no math, but it is hard to drive forward slowly and keep straight.
@@ -128,10 +144,17 @@ public class Sgp_BasicOpMode_Iterative extends OpMode
         // Send calculated power to wheels
         Left_Motor.setPower(leftPower);
         Right_Motor.setPower(rightPower);
+        Arm_Motor.setPower(armPower);
+        Arm_Servo.setPosition(up);
+
+
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
+        telemetry.addData("Motors", "left (%.2f), right (%.2f), arm (%.2f) up (%.2f) ", leftPower, rightPower, armPower, up);
+
+        //print to logcat
+        Log.d("loop","motor loop working");
     }
 
     /*
@@ -142,3 +165,12 @@ public class Sgp_BasicOpMode_Iterative extends OpMode
     }
 
 }
+
+
+/*
+*
+* gamepad1 = wheels
+* gamepad2 = arm and belt mechanism
+* gamepad1 = basic motor program with speed settings
+* gamepad2 = letter buttons is for the belt speed, the toggle buttons are for the arm :)
+* */
