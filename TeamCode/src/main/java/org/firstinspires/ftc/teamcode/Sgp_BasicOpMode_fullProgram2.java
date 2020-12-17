@@ -27,19 +27,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
 
-import android.util.Log;
-
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 /**
  * This file contains an example of an iterative (Non-Linear) "OpMode".
@@ -55,18 +49,23 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Basic: Iterative OpMode", group="Iterative Opmode")
-//@Disabled
-public class Sgp_BasicOpMode_Iterative extends OpMode
+@TeleOp(name="Basic: Iterative fullProgram2.0", group="Iterative Opmode")
+// @Disabled
+public class Sgp_BasicOpMode_fullProgram2 extends OpMode
 {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-   /* private DcMotor Left_Motor = null;
-    private DcMotor Right_Motor = null;
+    private DcMotor upper_right = null;
+    private DcMotor upper_left = null;
+    private DcMotor lower_left = null;
+    private DcMotor lower_right = null;
     private DcMotor Arm_Motor = null;
-    private Servo Arm_Servo = null;
-    double up = 0.0; */
-    private DcMotor Hex_Motor = null;
+    private Servo Wrist_1 = null;
+    private Servo Wrist_2 = null;
+    private Servo Finger = null;
+
+
+
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -78,25 +77,34 @@ public class Sgp_BasicOpMode_Iterative extends OpMode
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-       /* Left_Motor  = hardwareMap.get(DcMotor.class, "Left_Motor");
-        Right_Motor = hardwareMap.get(DcMotor.class, "Right_Motor");
+        upper_right  = hardwareMap.get(DcMotor.class, "upper_right");
+        upper_left = hardwareMap.get(DcMotor.class, "upper_left");
+        lower_left = hardwareMap.get(DcMotor.class, "lower_left");
+        lower_right = hardwareMap.get(DcMotor.class, "lower_right");
         Arm_Motor = hardwareMap.get(DcMotor.class, "Arm_Motor");
-        Arm_Servo = hardwareMap.get(Servo.class, "Arm_Servo");
-
-        */
-
-               Hex_Motor  = hardwareMap.get(DcMotor.class, "Hex_Motor");
-
-
+        Wrist_1 = hardwareMap.get(Servo.class, "Wrist_1");
+        Wrist_2 = hardwareMap.get(Servo.class, "Wrist_2");
+        Finger = hardwareMap.get(Servo.class, "Finger");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-//
-//        Left_Motor.setDirection(DcMotor.Direction.FORWARD);
-//        Right_Motor.setDirection(DcMotor.Direction.REVERSE);
-//        Arm_Motor.setDirection(DcMotor.Direction.FORWARD);
-//        Arm_Servo.setDirection(Servo.Direction.FORWARD );
-            Hex_Motor.setDirection(DcMotor.Direction.FORWARD);
+        upper_left.setDirection(DcMotor.Direction.FORWARD);
+        upper_right.setDirection(DcMotor.Direction.REVERSE);
+        lower_left.setDirection(DcMotor.Direction.FORWARD);
+        lower_right.setDirection(DcMotor.Direction.REVERSE);
+        Arm_Motor.setDirection(DcMotor.Direction.FORWARD);
+        Wrist_1.setDirection(Servo.Direction.FORWARD );
+        Wrist_2.setDirection(Servo.Direction.FORWARD );
+        Finger.setDirection(Servo.Direction.FORWARD );
+
+        //zero power behavior
+        upper_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        upper_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lower_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lower_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Arm_Motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
 
 
         // Tell the driver that initialization is complete.
@@ -108,11 +116,8 @@ public class Sgp_BasicOpMode_Iterative extends OpMode
      */
     @Override
     public void init_loop() {
-        //System.out.println("Loop");
-        Log.d("loop","init loop working");
     }
 
-       // Telemetry.update;
     /*
      * Code to run ONCE when the driver hits PLAY
      */
@@ -120,87 +125,57 @@ public class Sgp_BasicOpMode_Iterative extends OpMode
     public void start() {
         runtime.reset();
     }
+    double speedAdjust = 7;
+    int ClawVar = 0;
 
     /*
      * Code to run REPEATEDLY after the driver hits PLAY but before they hit STOP
      */
     @Override
     public void loop() {
-        // Setup a variable for each drive wheel to save power level for telemetry
-       /* double leftPower;
-        double rightPower;
-        double armPower;
-        double servoPower;*/
-
-        // Choose to drive using either Tank Mode, or POV Mode
-        // Comment out the method that's not used.  The default below is POV.
-
-        // POV Mode uses left stick to go forward, and right stick to turn.
-        // - This uses basic math to combine motions and is easier to drive straight.
-        /*double drive = -gamepad1.left_stick_y;
-        double turn  =  gamepad1.right_stick_x;
-        double lift = gamepad1.right_stick_y;
-
-        if( gamepad1.a )
-        {
-            if( up >=0.0 && up < 1.0 ) {
-                up += 0.1;
-            }
-            else {
-                up -= 0.1;
-            }
+        if (gamepad1.dpad_left == true) {
+            speedAdjust -= 1;
         }
-        else
-        {
-
+        if(gamepad1.dpad_right == true) {
+            speedAdjust += 1;
         }
+        //set motor power
+        lower_left.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10));
+        lower_right.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10));
+        upper_left.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10));
+        upper_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10));
 
-        leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
-        rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
-        armPower     = Range.clip(lift, -1.0, 1.0);
-        servoPower   = Range.clip(up, -1.0, 1.0 );
+        //set arm's power
+        Arm_Motor.setPower(gamepad2.left_stick_y );
+        // Servo setPosition
+        Wrist_1.setPosition(gamepad2.right_stick_y);
+        Wrist_2.setPosition(gamepad2.left_stick_x);
 
-        // Tank Mode uses one stick to control each wheel.
-        // - This requires no math, but it is hard to drive forward slowly and keep straight.
-        // leftPower  = -gamepad1.left_stick_y ;
-        // rightPower = -gamepad1.right_stick_y ;
+            //Claw
+                if (gamepad2.x){
+                   if(ClawVar == 0){
+                        Finger.setPosition(0);
+                        ClawVar = 1;
+                   } else if(ClawVar == 1){
+                       Finger.setPosition(1);
+                       ClawVar = 0;
+                   }
 
-        // Send calculated power to wheels
-        Left_Motor.setPower(leftPower);
-        Right_Motor.setPower(rightPower);
-        Arm_Motor.setPower(armPower);
-        Arm_Servo.setPosition(up); */
-        double motor_power = gamepad1.left_stick_y;
-        Hex_Motor.setPower(motor_power);
+                }
 
 
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData( "Motor Power", motor_power);
-        telemetry.addData( "Motor Power", motor_power);
-       // telemetry.addData("Motors", "left (%.2f), right (%.2f), arm (%.2f) up (%.2f) ", leftPower, rightPower, armPower, up);
-
-        //print to logcat
-        Log.d("loop","motor loop working");
+       telemetry.addData("Speed Adjust", speedAdjust) ;
+       telemetry.addData( "Arm Data" , "Arm Motor: " + Arm_Motor.getCurrentPosition() + ", Wrist 1 Servo: " + Wrist_1.getPosition() + ", Wrist 2 Servo: " + Wrist_2.getPosition() + ", Finger Servo: " + Finger.getPosition());
     }
 
     /*
      * Code to run ONCE after the driver hits STOP
      */
-
-
     @Override
     public void stop() {
     }
 
 }
-
-
-/*
-*
-* gamepad1 = wheels
-* gamepad2 = arm and belt mechanism
-* gamepad1 = basic motor program with speed settings
-* gamepad2 = letter buttons is for the belt speed, the toggle buttons are for the arm :)
-* */
