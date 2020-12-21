@@ -50,7 +50,7 @@ import com.qualcomm.robotcore.hardware.configuration.ServoControllerConfiguratio
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
-@TeleOp(name = "Sgp Wrist Servos", group = "Concept")
+@TeleOp(name = "Concept: Sgp Wrist Servos", group = "Concept")
 public class Sgp_Concept_WristServos extends LinearOpMode {
 
     static final double INCREMENT   = 0.01;     // amount to slew servo each CYCLE_MS cycle
@@ -68,6 +68,7 @@ public class Sgp_Concept_WristServos extends LinearOpMode {
     boolean rampUp = true;
     double[] range = RANGE_FULL;
     double  position = (range[1] - range[0]) / 2; // Start at halfway position
+    double increment = INCREMENT;
 
     @Override
     public void runOpMode() {
@@ -93,33 +94,40 @@ public class Sgp_Concept_WristServos extends LinearOpMode {
         // Scan servo till stop pressed.
         while(opModeIsActive()){
 
+            // If trigger is pulled, ramp down, otherwise ramp up.
+            rampUp = gamepad2.right_trigger == 0f;
+
+            // If gamepad2 X, then activate Wrist_1
             if( gamepad2.x)
             {
                 activeServo = Wrist_1;
                 range = RANGE_FULL;
             }
+            // If gamepad2 Y, then activate Wrist_2
             else if ( gamepad2.y)
             {
                 activeServo = Wrist_2;
                 range = RANGE_FULL;
             }
+            // If gamepad2 Y, then activate Claw
             else if (gamepad2.b)
             {
                 activeServo = Claw;
-                range = RANGE_TOP_HALF;
+                range = RANGE_FULL;
                 // If switching to claw with an initial position less than where the claw can go,
                 // reset it to start at the min of range. Expect that claw may jump to this state
                 // if its current position is anything but closed.
-                if(position < range[0] )
-                    position = range[0];
+//                if(position < range[0] )
+//                    position = range[0];
             }
             else if (gamepad2.a)
             {
                 // Reset
-                position = (RANGE_FULL[1] - RANGE_FULL[0])/2;
-                Wrist_1.setPosition((RANGE_FULL[1] - RANGE_FULL[0])/2);
-                Wrist_2.setPosition((RANGE_FULL[1] - RANGE_FULL[0])/2);
-                Claw.setPosition ((RANGE_FULL[1] - RANGE_FULL[0])/2);
+                range = RANGE_FULL;
+                position = (range[1] - range[0])/2;
+                Wrist_1.setPosition((range[1] - range[0])/2);
+                Wrist_2.setPosition((range[1] - range[0])/2);
+                Claw.setPosition ((range[1] - range[0])/2);
                 activeServo = null;
                 activeServoController = null;
             }
@@ -134,18 +142,16 @@ public class Sgp_Concept_WristServos extends LinearOpMode {
             // slew the servo, according to the rampUp (direction) variable.
             if (rampUp) {
                 // Keep stepping up until we hit the max value.
-                position += INCREMENT ;
+                position += increment ;
                 if (position >= range[1] ) {
                     position = range[1];
-                    rampUp = false;   // Switch ramp direction
                 }
             }
             else {
                 // Keep stepping down until we hit the min value.
-                position -= INCREMENT ;
+                position -= increment ;
                 if (position <= range[0] ) {
                     position = range[0];
-                    rampUp = true;  // Switch ramp direction
                 }
             }
 

@@ -32,7 +32,9 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 /**
@@ -60,12 +62,12 @@ public class Sgp_BasicOpMode_fullProgram2 extends OpMode
     private DcMotor lower_left = null;
     private DcMotor lower_right = null;
     private DcMotor Arm_Motor = null;
+    private DcMotor Batman_Belt = null;
+    private DcMotor Bravo_6 = null;
     private Servo Wrist_1 = null;
     private Servo Wrist_2 = null;
     private Servo Finger = null;
-
-
-
+    private ServoController FingerController = null;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -82,6 +84,8 @@ public class Sgp_BasicOpMode_fullProgram2 extends OpMode
         lower_left = hardwareMap.get(DcMotor.class, "lower_left");
         lower_right = hardwareMap.get(DcMotor.class, "lower_right");
         Arm_Motor = hardwareMap.get(DcMotor.class, "Arm_Motor");
+        Batman_Belt = hardwareMap.get(DcMotor.class, "Batman_Belt");
+        Bravo_6 = hardwareMap.get(DcMotor.class, "Bravo_6");
         Wrist_1 = hardwareMap.get(Servo.class, "Wrist_1");
         Wrist_2 = hardwareMap.get(Servo.class, "Wrist_2");
         Finger = hardwareMap.get(Servo.class, "Finger");
@@ -93,9 +97,13 @@ public class Sgp_BasicOpMode_fullProgram2 extends OpMode
         lower_left.setDirection(DcMotor.Direction.FORWARD);
         lower_right.setDirection(DcMotor.Direction.REVERSE);
         Arm_Motor.setDirection(DcMotor.Direction.FORWARD);
+        Batman_Belt.setDirection(DcMotor.Direction.REVERSE);
+        Bravo_6.setDirection(DcMotor.Direction.FORWARD);
         Wrist_1.setDirection(Servo.Direction.FORWARD );
         Wrist_2.setDirection(Servo.Direction.FORWARD );
         Finger.setDirection(Servo.Direction.FORWARD );
+
+        //FingerController = Finger.getController();
 
         //zero power behavior
         upper_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -103,8 +111,8 @@ public class Sgp_BasicOpMode_fullProgram2 extends OpMode
         lower_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lower_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Arm_Motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-
+        Batman_Belt.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Bravo_6.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
         // Tell the driver that initialization is complete.
@@ -133,10 +141,10 @@ public class Sgp_BasicOpMode_fullProgram2 extends OpMode
      */
     @Override
     public void loop() {
-        if (gamepad1.dpad_left == true) {
+        if (gamepad1.dpad_left) {
             speedAdjust -= 1;
         }
-        if(gamepad1.dpad_right == true) {
+        if(gamepad1.dpad_right) {
             speedAdjust += 1;
         }
         //set motor power
@@ -145,16 +153,21 @@ public class Sgp_BasicOpMode_fullProgram2 extends OpMode
         upper_left.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1. right_stick_x)*(-speedAdjust/10));
         upper_right.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1. right_stick_x)*(-speedAdjust/10));
 
-        //set arm's power
-        Arm_Motor.setPower(gamepad2.left_stick_y );
-        // Servo setPosition
-        Wrist_1.setPosition(gamepad2.right_stick_y);
-        Wrist_2.setPosition(gamepad2.left_stick_x);
+        // Set conveyor belt power
+        Batman_Belt.setPower(gamepad2.left_stick_y * 3);
+        Bravo_6.setPower(gamepad2.right_stick_y * 3);
 
-            //Claw
+        //FingerController.pwmEnable();
+        //set arm's power
+        //Arm_Motor.setPower(gamepad2.left_stick_y );
+        // Servo setPosition
+        //Wrist_1.setPosition(gamepad2.right_stick_y);
+        //Wrist_2.setPosition(gamepad2.left_stick_x);
+
+            /*Claw
                 if (gamepad2.x){
                    if(ClawVar == 0){
-                        Finger.setPosition(0);
+                        Finger.setPosition(-1);
                         ClawVar = 1;
                    } else if(ClawVar == 1){
                        Finger.setPosition(1);
@@ -162,11 +175,22 @@ public class Sgp_BasicOpMode_fullProgram2 extends OpMode
                    }
 
                 }
+                */
 
-
+        // check to see if we need to move the servo.
+        if(gamepad1.y) {
+            // move to 0 degrees.
+            Finger.setPosition(0);
+        } else if (gamepad1.x || gamepad1.b) {
+            // move to 90 degrees.
+            Finger.setPosition(0.5);
+        } else if (gamepad1.a) {
+            // move to 180 degrees.
+            Finger.setPosition(1);
+        }
 
         // Show the elapsed game time and wheel power.
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
+       telemetry.addData("Status", "Run Time: " + runtime.toString());
        telemetry.addData("Speed Adjust", speedAdjust) ;
        telemetry.addData( "Arm Data" , "Arm Motor: " + Arm_Motor.getCurrentPosition() + ", Wrist 1 Servo: " + Wrist_1.getPosition() + ", Wrist 2 Servo: " + Wrist_2.getPosition() + ", Finger Servo: " + Finger.getPosition());
     }
