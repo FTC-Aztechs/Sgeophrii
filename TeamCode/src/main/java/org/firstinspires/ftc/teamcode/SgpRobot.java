@@ -51,8 +51,20 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Servo channel:  Servo to open left claw:  "left_hand"
  * Servo channel:  Servo to open right claw: "right_hand"
  */
-public class Sgp_robot
+public class SgpRobot
 {
+    enum SgpMotors
+    {
+        UPPER_LEFT,
+        LOWER_LEFT,
+        UPPER_RIGHT,
+        LOWER_RIGHT,
+        LEFT,
+        RIGHT,
+        UPPER,
+        LOWER,
+        ALL
+    }
     /* Public OpMode members. */
     public DcMotor upper_right = null;
     public DcMotor upper_left = null;
@@ -75,7 +87,7 @@ public class Sgp_robot
     private ElapsedTime period  = new ElapsedTime();
 
     /* Constructor */
-    public Sgp_robot(){
+    public SgpRobot(){
 
     }
 
@@ -118,14 +130,150 @@ public class Sgp_robot
         Wrist_2.setDirection(Servo.Direction.FORWARD );
         Finger.setDirection(Servo.Direction.FORWARD );
 
-        //zero power behavior
-        upper_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        upper_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lower_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        lower_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        Arm_Motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        Batman_Belt.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        Bravo_6.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
+
+    public void setRunMode(SgpMotors eWhichMotor, DcMotor.RunMode eMode )
+    {
+
+        switch (eWhichMotor){
+            case UPPER_LEFT:
+                upper_left.setMode(eMode);
+                break;
+            case UPPER_RIGHT:
+                upper_right.setMode(eMode);
+                break;
+            case LOWER_LEFT:
+                lower_left.setMode(eMode);
+                break;
+            case LOWER_RIGHT:
+                lower_right.setMode(eMode);
+                break;
+            case LEFT:
+                lower_left.setMode(eMode);
+                upper_left.setMode(eMode);
+                break;
+            case RIGHT:
+                lower_right.setMode(eMode);
+                upper_right.setMode(eMode);
+                break;
+            case LOWER:
+                lower_right.setMode(eMode);
+                lower_left.setMode(eMode);
+                break;
+            case UPPER:
+                upper_right.setMode(eMode);
+                upper_left.setMode(eMode);
+                break;
+            case ALL:
+                lower_right.setMode(eMode);
+                lower_left.setMode(eMode);
+                upper_right.setMode(eMode);
+                upper_left.setMode(eMode);
+                break;
+        }
+    }
+
+    public void setPower(SgpMotors eWhichMotor, double dPower )
+    {
+
+        switch (eWhichMotor){
+            case UPPER_LEFT:
+                upper_left.setPower(dPower);
+                break;
+            case UPPER_RIGHT:
+                upper_right.setPower(dPower);
+                break;
+            case LOWER_LEFT:
+                lower_left.setPower(dPower);
+                break;
+            case LOWER_RIGHT:
+                lower_right.setPower(dPower);
+                break;
+            case LEFT:
+                lower_left.setPower(dPower);
+                upper_left.setPower(dPower);
+                break;
+            case RIGHT:
+                lower_right.setPower(dPower);
+                upper_right.setPower(dPower);
+                break;
+            case LOWER:
+                lower_right.setPower(dPower);
+                lower_left.setPower(dPower);
+                break;
+            case UPPER:
+                upper_right.setPower(dPower);
+                upper_left.setPower(dPower);
+                break;
+            case ALL:
+                lower_right.setPower(dPower);
+                lower_left.setPower(dPower);
+                upper_right.setPower(dPower);
+                upper_left.setPower(dPower);
+                break;
+        }
+    }
+
+    public int getCurrentPosition( SgpMotors eWhichMotor )
+    {
+        switch(eWhichMotor)
+        {
+            case UPPER_LEFT:
+                return upper_left.getCurrentPosition();
+            case LOWER_LEFT:
+                return lower_left.getCurrentPosition();
+            case UPPER_RIGHT:
+                return upper_right.getCurrentPosition();
+            case LOWER_RIGHT:
+                return lower_right.getCurrentPosition();
+            default:
+                return 0;
+        }
+    }
+
+    public void setTargetPosition( SgpMotors eWhichMotor, int iPos )
+    {
+        switch( eWhichMotor)
+        {
+            case UPPER_LEFT:
+                upper_left.setTargetPosition(iPos);
+            case LOWER_LEFT:
+                lower_left.setTargetPosition(iPos);
+            case UPPER_RIGHT:
+                upper_right.setTargetPosition(iPos);
+            case LOWER_RIGHT:
+                lower_right.setTargetPosition(iPos);
+            default :
+                break;
+        }
+    }
+
+    public boolean areDrivesBusy(SgpMotors eWhichMotor) {
+
+        switch(eWhichMotor)
+        {
+            case UPPER_LEFT: // upper left
+                return upper_left.isBusy();
+            case LOWER_LEFT: // lower left
+                return lower_left.isBusy();
+            case UPPER_RIGHT: // upper right
+                return upper_right.isBusy();
+            case LOWER_RIGHT: // lower right
+                return lower_right.isBusy();
+            case LEFT: // left side
+                return (lower_left.isBusy() && upper_left.isBusy());
+            case RIGHT: // right side
+                return (lower_right.isBusy() && upper_right.isBusy());
+            case UPPER: // upper side
+                return (upper_left.isBusy() && upper_right.isBusy());
+            case LOWER: // lower side
+                return (lower_left.isBusy() && lower_right.isBusy());
+            case ALL: // All
+                return lower_left.isBusy() && lower_right.isBusy() && upper_left.isBusy() && upper_right.isBusy();
+            default:
+                return false;
+        }
+    }
+
  }
 

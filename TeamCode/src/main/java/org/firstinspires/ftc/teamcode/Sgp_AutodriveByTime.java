@@ -30,11 +30,8 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
 
 /**
  * This file illustrates the concept of driving a path based on time.
@@ -57,11 +54,11 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Concept: Auto Drive By Time", group="Pushbot")
+@Autonomous(name="Concept: Auto Drive By Time", group="Drive")
 public class Sgp_AutodriveByTime extends LinearOpMode {
 
     /* Declare OpMode members. */
-    Sgp_robot         robot   = new Sgp_robot();   // Use a Pushbot's hardware
+    SgpRobot robot   = new SgpRobot();   // Use a Pushbot's hardware
     private ElapsedTime     runtime = new ElapsedTime();
 
     static final double     FORWARD_SPEED = 0.6;

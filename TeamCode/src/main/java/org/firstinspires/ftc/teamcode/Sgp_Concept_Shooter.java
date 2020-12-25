@@ -51,7 +51,6 @@ import com.qualcomm.robotcore.util.Range;
  */
 
 @TeleOp(name="Concept: Shooter prototype", group="Linear Opmode")
-
 public class Sgp_Concept_Shooter extends LinearOpMode {
 
     // Declare OpMode members.
