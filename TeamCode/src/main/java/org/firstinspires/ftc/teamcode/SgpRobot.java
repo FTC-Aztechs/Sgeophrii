@@ -29,11 +29,25 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.provider.BlockedNumberContract;
+
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.Func;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+
+import java.util.Locale;
 
 /**
  * This is NOT an opmode.
@@ -77,6 +91,7 @@ public class SgpRobot
     public Servo Wrist_2 = null;
     public Servo Finger = null;
     public ServoController FingerController = null;
+    public BNO055IMU imu_gyro = null;
 
     public static final double MID_SERVO       =  0.5 ;
     public static final double ARM_UP_POWER    =  0.45 ;
@@ -108,6 +123,10 @@ public class SgpRobot
         Wrist_2 = hwMap.get(Servo.class, "Wrist_2");
         Finger = hwMap.get(Servo.class, "Finger");
 
+        // Acquire gyro
+        initImuGyro();
+
+
         // Set all motors to zero power
         upper_left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         upper_right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -131,6 +150,93 @@ public class SgpRobot
         Finger.setDirection(Servo.Direction.FORWARD );
 
     }
+
+    public void initImuGyro()
+    {
+        if(imu_gyro == null)
+        {
+            imu_gyro = hwMap.get(BNO055IMU.class, "imu");
+        }
+
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters.loggingEnabled      = true;
+        parameters.loggingTag          = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+        imu_gyro.initialize(parameters);
+    }
+
+//    public void imuTelemetry(Telemetry telemetry)
+//    {
+//        if(imu_gyro == null)
+//            initImuGyro();
+//        final Orientation angles;
+//        final Acceleration gravity;
+//
+//        telemetry.addAction( new Runnable() {
+//                                 @Override
+//                                 public void run() {
+//                                     angles = imu_gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//                                     gravity = imu_gyro.getGravity();
+//                                 }
+//                             });
+//
+//        telemetry.addLine()
+//                .addData("status", new Func<String>() {
+//                    @Override public String value() {
+//                        return imu_gyro.getSystemStatus().toShortString();
+//                    }
+//                })
+//                .addData("calib", new Func<String>) {
+//                    @Override public String value () {
+//                        return imu_gyro.getCalibrationStatus().toString();
+//                    }
+//                });
+//
+//        telemetry.addLine()
+//                .addData("heading", new Func<String>() {
+//                    @Override public String value() {
+//                        return formatAngle(angles.angleUnit, angles.firstAngle);
+//                    }
+//                })
+//                .addData("roll", new Func<String>() {
+//                    @Override public String value() {
+//                        return formatAngle(angles.angleUnit, angles.secondAngle);
+//                    }
+//                })
+//                .addData("pitch", new Func<String>() {
+//                    @Override public String value() {
+//                        return formatAngle(angles.angleUnit, angles.thirdAngle);
+//                    }
+//                });
+//
+//        telemetry.addLine()
+//                .addData("grvty", new Func<String>() {
+//                    @Override public String value() {
+//                        return gravity.toString();
+//                    }
+//                })
+//                .addData("mag", new Func<String>() {
+//                    @Override public String value() {
+//                        return String.format(Locale.getDefault(), "%.3f",
+//                                Math.sqrt(gravity.xAccel*gravity.xAccel
+//                                        + gravity.yAccel*gravity.yAccel
+//                                        + gravity.zAccel*gravity.zAccel));
+//                    }
+//                });
+//    }
+
+    String formatAngle( AngleUnit angleUnit, double angle) {
+        return formatDegrees(angleUnit.DEGREES.fromUnit(angleUnit, angle));
+    }
+
+    String formatDegrees(double degrees) {
+        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
+
+
 
     public void setRunMode(SgpMotors eWhichMotor, DcMotor.RunMode eMode )
     {
@@ -226,6 +332,17 @@ public class SgpRobot
                 return upper_right.getCurrentPosition();
             case LOWER_RIGHT:
                 return lower_right.getCurrentPosition();
+            case RIGHT:
+                return (upper_right.getCurrentPosition()+ lower_right.getCurrentPosition())/2;
+            case LEFT:
+                return (upper_left.getCurrentPosition() + lower_left.getCurrentPosition())/2;
+            case UPPER:
+                return ( upper_left.getCurrentPosition() + upper_right.getCurrentPosition())/2;
+            case LOWER:
+                return (lower_left.getCurrentPosition() + lower_right.getCurrentPosition())/2;
+            case ALL:
+                return (upper_left.getCurrentPosition() + upper_right.getCurrentPosition() +
+                        lower_left.getCurrentPosition() + lower_right.getCurrentPosition())/4;
             default:
                 return 0;
         }
@@ -237,12 +354,39 @@ public class SgpRobot
         {
             case UPPER_LEFT:
                 upper_left.setTargetPosition(iPos);
+                break;
             case LOWER_LEFT:
                 lower_left.setTargetPosition(iPos);
+                break;
             case UPPER_RIGHT:
                 upper_right.setTargetPosition(iPos);
+                break;
             case LOWER_RIGHT:
                 lower_right.setTargetPosition(iPos);
+                break;
+            case LEFT:
+                upper_left.setTargetPosition(iPos);
+                lower_left.setTargetPosition(iPos);
+                break;
+            case RIGHT:
+                upper_right.setTargetPosition(iPos);
+                lower_right.setTargetPosition(iPos);
+                break;
+            case LOWER:
+                lower_left.setTargetPosition(iPos);
+                lower_right.setTargetPosition(iPos);
+                break;
+            case UPPER:
+                upper_right.setTargetPosition(iPos);
+                upper_left.setTargetPosition(iPos);
+                break;
+            case ALL:
+                upper_right.setTargetPosition(iPos);
+                upper_left.setTargetPosition(iPos);
+                lower_left.setTargetPosition(iPos);
+                lower_right.setTargetPosition(iPos);
+                break;
+
             default :
                 break;
         }
