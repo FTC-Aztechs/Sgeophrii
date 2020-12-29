@@ -241,6 +241,7 @@ public class SgpRobot
     public void setRunMode(SgpMotors eWhichMotor, DcMotor.RunMode eMode )
     {
 
+        
         switch (eWhichMotor){
             case UPPER_LEFT:
                 upper_left.setMode(eMode);
